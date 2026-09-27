@@ -23,6 +23,37 @@ supports a quick validation with RMSE and PSNR. These image-space measurements
 verify that the corruption machinery behaves as intended; they do not measure
 classifier robustness.
 
+## Day 2: measure paired predictive degradation
+
+The benchmark now accepts any classifier implementing `predict_logits(images)`.
+It evaluates a clean batch once, applies each corruption independently to the
+same examples, and reports:
+
+- clean and corrupted accuracy;
+- absolute accuracy degradation;
+- prediction-flip, clean-to-failure, and recovery rates;
+- mean predicted confidence; and
+- per-example clean/corrupted predictions for diagnosis.
+
+A deterministic nearest-centroid adapter and synthetic texture dataset exercise
+the entire pipeline without implying pretrained-model performance. Framework
+wrappers can adopt the same interface while keeping evaluation code unchanged.
+
+The deterministic pipeline-validation fixture produced the following endpoints:
+
+| Condition | Accuracy | Accuracy drop | Mean confidence |
+|---|---:|---:|---:|
+| Clean | 0.9625 | — | 0.9301 |
+| Brightness, severity 5 | 0.9625 | 0.0000 | 0.5975 |
+| Contrast, severity 5 | 0.9583 | 0.0042 | 0.5944 |
+| Gaussian noise, severity 5 | 0.9625 | 0.0000 | 0.9180 |
+| Gaussian blur, severity 5 | 0.5417 | 0.4208 | 0.4122 |
+
+These figures validate the evaluation machinery on a synthetic nearest-centroid
+task. They are not estimates of deep-model performance or natural-shift
+robustness. Notably, brightness reduced confidence without changing accuracy,
+whereas severe blur caused both prediction flips and clean-to-corrupted failures.
+
 ## Quick start
 
 ```bash
@@ -30,6 +61,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
 python scripts/run_corruption_smoke.py
+python scripts/evaluate_classifier.py
 pytest
 ```
 
@@ -45,7 +77,7 @@ pytest
 ## Planned progression
 
 1. Deterministic corruption registry and image-space validation (complete)
-2. Classifier adapter and clean-versus-corrupted evaluation runner
+2. Classifier adapter and clean-versus-corrupted evaluation runner (complete)
 3. Severity curves and corruption-normalised degradation metrics
 4. Calibration and selective prediction under corruption
 5. Subgroup and worst-case diagnostics
