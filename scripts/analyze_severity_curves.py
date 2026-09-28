@@ -1,4 +1,4 @@
-"""Run a deterministic clean-versus-corrupted classifier evaluation."""
+"""Summarise full corruption-severity curves with paired uncertainty."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import json
 from vision_shift_bench import (
     CorruptionSpec,
     NearestCentroidClassifier,
+    analyse_severity_curves,
     evaluate_corruptions,
     make_pattern_dataset,
 )
@@ -25,8 +26,15 @@ def main() -> None:
         for kind in ("brightness", "contrast", "gaussian_noise", "gaussian_blur")
         for severity in range(1, 6)
     ]
-    result = evaluate_corruptions(classifier, evaluation_images, evaluation_labels, specs)
-    print(json.dumps(result.to_dict(), indent=2))
+    benchmark = evaluate_corruptions(classifier, evaluation_images, evaluation_labels, specs)
+    analysis = analyse_severity_curves(
+        benchmark,
+        accuracy_floor=0.85,
+        confidence_level=0.95,
+        bootstrap_resamples=1000,
+        seed=211,
+    )
+    print(json.dumps(analysis.to_dict(), indent=2))
 
 
 if __name__ == "__main__":

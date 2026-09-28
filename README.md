@@ -54,6 +54,35 @@ task. They are not estimates of deep-model performance or natural-shift
 robustness. Notably, brightness reduced confidence without changing accuracy,
 whereas severe blur caused both prediction flips and clean-to-corrupted failures.
 
+## Day 3: quantify severity curves and failure points
+
+Every corruption is now evaluated at all five severities. The analysis layer:
+
+- constructs ordered accuracy and degradation curves;
+- calculates paired bootstrap intervals for accuracy degradation;
+- integrates degradation over severity and normalises it by clean accuracy;
+- reports the complementary normalised accuracy-retention area; and
+- identifies the first severity below a declared deployment accuracy floor.
+
+The normalised areas include severity zero as the clean baseline. This avoids
+treating the first corrupted condition as though it were the unshifted model.
+Confidence intervals resample matched clean/corrupted outcomes together so the
+pairing information is not discarded.
+
+With an accuracy floor of `0.85`, the deterministic validation run produced:
+
+| Corruption | Normalised retention AUC | First failing severity |
+|---|---:|---:|
+| Brightness | 1.0000 | None |
+| Contrast | 0.9996 | None |
+| Gaussian noise | 1.0000 | None |
+| Gaussian blur | 0.8688 | 4 |
+
+At blur severity 4, accuracy fell from `0.9625` to `0.5417`. The paired 95%
+bootstrap interval for the `0.4208` accuracy drop was `[0.3500, 0.4917]` using
+1,000 deterministic resamples. These synthetic results validate the analysis;
+they do not establish a robustness ranking for trained vision architectures.
+
 ## Quick start
 
 ```bash
@@ -62,6 +91,7 @@ source .venv/bin/activate
 python -m pip install -e ".[dev]"
 python scripts/run_corruption_smoke.py
 python scripts/evaluate_classifier.py
+python scripts/analyze_severity_curves.py
 pytest
 ```
 
@@ -78,7 +108,7 @@ pytest
 
 1. Deterministic corruption registry and image-space validation (complete)
 2. Classifier adapter and clean-versus-corrupted evaluation runner (complete)
-3. Severity curves and corruption-normalised degradation metrics
+3. Severity curves and corruption-normalised degradation metrics (complete)
 4. Calibration and selective prediction under corruption
 5. Subgroup and worst-case diagnostics
 6. Cross-model comparison report
