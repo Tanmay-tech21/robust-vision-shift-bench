@@ -22,6 +22,8 @@ class PredictionRecord:
     corrupted_prediction: int
     clean_confidence: float
     corrupted_confidence: float
+    clean_true_probability: float
+    corrupted_true_probability: float
 
 
 @dataclass(frozen=True)
@@ -73,7 +75,7 @@ def _predict(
     classifier: LogitPredictor,
     images: NDArray[np.float64],
     batch_size: int,
-) -> tuple[NDArray[np.int64], NDArray[np.float64], int]:
+) -> tuple[NDArray[np.int64], NDArray[np.float64], NDArray[np.float64]]:
     rows: list[NDArray[np.float64]] = []
     for start in range(0, images.shape[0], batch_size):
         stop = min(start + batch_size, images.shape[0])
@@ -90,7 +92,7 @@ def _predict(
     probabilities /= probabilities.sum(axis=1, keepdims=True)
     predictions = all_logits.argmax(axis=1).astype(np.int64)
     confidence = probabilities[np.arange(probabilities.shape[0]), predictions]
-    return predictions, confidence, all_logits.shape[1]
+    return predictions, confidence, probabilities
 
 
 def _corrupt_batch(
@@ -125,7 +127,10 @@ def evaluate_corruptions(
     if not isinstance(batch_size, int) or isinstance(batch_size, bool) or batch_size <= 0:
         raise ValueError("batch_size must be a positive integer")
 
-    clean_prediction, clean_confidence, class_count = _predict(classifier, batch, batch_size)
+    clean_prediction, clean_confidence, clean_probabilities = _predict(
+        classifier, batch, batch_size
+    )
+    class_count = clean_probabilities.shape[1]
     if targets.max(initial=0) >= class_count:
         raise ValueError("labels contain a class absent from classifier logits")
     clean_correct = clean_prediction == targets
@@ -134,7 +139,10 @@ def evaluate_corruptions(
     conditions: list[ConditionResult] = []
     for spec in specs:
         corrupted = _corrupt_batch(batch, spec)
-        prediction, confidence, shifted_class_count = _predict(classifier, corrupted, batch_size)
+        prediction, confidence, shifted_probabilities = _predict(
+            classifier, corrupted, batch_size
+        )
+        shifted_class_count = shifted_probabilities.shape[1]
         if shifted_class_count != class_count:
             raise ValueError("classifier must return the same class count for every batch")
         correct = prediction == targets
@@ -146,6 +154,10 @@ def evaluate_corruptions(
                 corrupted_prediction=int(prediction[index]),
                 clean_confidence=float(clean_confidence[index]),
                 corrupted_confidence=float(confidence[index]),
+                clean_true_probability=float(clean_probabilities[index, targets[index]]),
+                corrupted_true_probability=float(
+                    shifted_probabilities[index, targets[index]]
+                ),
             )
             for index in range(batch.shape[0])
         )

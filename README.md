@@ -83,6 +83,37 @@ bootstrap interval for the `0.4208` accuracy drop was `[0.3500, 0.4917]` using
 1,000 deterministic resamples. These synthetic results validate the analysis;
 they do not establish a robustness ranking for trained vision architectures.
 
+## Day 4: audit calibration and selective risk under corruption
+
+Per-example records now retain the probability assigned to the true class. This
+supports severity-wise evaluation of:
+
+- multiclass negative log-likelihood;
+- top-label expected calibration error;
+- area under the risk-coverage curve; and
+- selective risk at a declared target coverage.
+
+The analysis reports the first severity that violates an ECE ceiling and the
+first that violates a selective-risk ceiling. Confidence ties use example index
+as a deterministic secondary key, keeping AURC exactly reproducible.
+
+Using 15 ECE bins, 80% target coverage, and `0.10` ceilings for ECE and
+selective risk, the synthetic validation produced:
+
+| Corruption | First ECE failure | First selective-risk failure |
+|---|---:|---:|
+| Brightness | 2 | None |
+| Contrast | 2 | None |
+| Gaussian noise | None | None |
+| Gaussian blur | 2 | 4 |
+
+The clean ECE was `0.0719`, NLL was `0.1291`, and risk at 80% coverage was
+zero. Brightness severity 2 raised ECE to `0.1300` without changing accuracy,
+showing a calibration failure before a classification failure. Blur severity 4
+raised selective risk at 80% coverage to `0.3229`; by severity 5, AURC reached
+`0.3935`. ECE itself fell from `0.3488` at blur severity 3 to `0.1822` at
+severity 5 even as NLL worsened, another warning against relying on one metric.
+
 ## Quick start
 
 ```bash
@@ -92,6 +123,7 @@ python -m pip install -e ".[dev]"
 python scripts/run_corruption_smoke.py
 python scripts/evaluate_classifier.py
 python scripts/analyze_severity_curves.py
+python scripts/analyze_reliability_under_shift.py
 pytest
 ```
 
@@ -109,7 +141,7 @@ pytest
 1. Deterministic corruption registry and image-space validation (complete)
 2. Classifier adapter and clean-versus-corrupted evaluation runner (complete)
 3. Severity curves and corruption-normalised degradation metrics (complete)
-4. Calibration and selective prediction under corruption
+4. Calibration and selective prediction under corruption (complete)
 5. Subgroup and worst-case diagnostics
 6. Cross-model comparison report
 7. Reproducible benchmark card and portfolio integration
