@@ -114,6 +114,37 @@ raised selective risk at 80% coverage to `0.3229`; by severity 5, AURC reached
 `0.3935`. ECE itself fell from `0.3488` at blur severity 3 to `0.1822` at
 severity 5 even as NLL worsened, another warning against relying on one metric.
 
+## Day 5: expose subgroup and worst-case failures
+
+The benchmark now audits a single global confidence-based abstention policy by
+class. At every corruption severity it reports:
+
+- support, accuracy, mean confidence, and realised coverage for each class;
+- selective risk among the accepted examples in each class;
+- macro and worst-class accuracy and selective risk; and
+- the gap between maximum and minimum class coverage.
+
+Selection remains global: the most confident examples are accepted regardless
+of class. This deliberately reveals whether an apparently reasonable overall
+coverage target is achieved by disproportionately rejecting one subgroup.
+Confidence ties use example index as a deterministic secondary key.
+
+With 80% target coverage, a `0.20` class-coverage-gap ceiling, and a `0.15`
+worst-class-risk ceiling, the synthetic validation produced:
+
+| Corruption | First coverage-gap failure | First worst-risk failure |
+|---|---:|---:|
+| Brightness | 5 | None |
+| Contrast | 4 | None |
+| Gaussian noise | None | None |
+| Gaussian blur | 3 | 4 |
+
+At blur severity 4, realised class coverage ranged from `0.40` to `1.00`.
+The least-covered class had `0.00` accuracy and `1.00` selective risk among its
+accepted predictions. This is a controlled diagnostic fixture, not evidence
+about a trained model or a protected demographic group. It demonstrates that
+aggregate target coverage cannot substitute for subgroup-level risk reporting.
+
 ## Quick start
 
 ```bash
@@ -124,6 +155,7 @@ python scripts/run_corruption_smoke.py
 python scripts/evaluate_classifier.py
 python scripts/analyze_severity_curves.py
 python scripts/analyze_reliability_under_shift.py
+python scripts/analyze_subgroups_under_shift.py
 pytest
 ```
 
@@ -142,6 +174,6 @@ pytest
 2. Classifier adapter and clean-versus-corrupted evaluation runner (complete)
 3. Severity curves and corruption-normalised degradation metrics (complete)
 4. Calibration and selective prediction under corruption (complete)
-5. Subgroup and worst-case diagnostics
+5. Subgroup and worst-case diagnostics (complete)
 6. Cross-model comparison report
 7. Reproducible benchmark card and portfolio integration

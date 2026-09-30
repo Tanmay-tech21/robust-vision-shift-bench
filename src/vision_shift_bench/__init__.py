@@ -13,6 +13,15 @@ from .reliability import (
     summarise_prediction_records,
 )
 from .robustness import CorruptionCurve, SeverityAnalysis, SeverityPoint, analyse_severity_curves
+from .subgroups import (
+    GroupSnapshot,
+    SubgroupAnalysis,
+    SubgroupCurve,
+    SubgroupPoint,
+    SubgroupSnapshot,
+    analyse_subgroups_under_shift,
+    summarise_subgroups,
+)
 from .synthetic import make_pattern_dataset, make_reference_image
 
 __all__ = [
@@ -22,6 +31,7 @@ __all__ = [
     "CorruptionKind",
     "CorruptionSpec",
     "LogitPredictor",
+    "GroupSnapshot",
     "NearestCentroidClassifier",
     "PredictionRecord",
     "ReliabilityAnalysis",
@@ -30,8 +40,13 @@ __all__ = [
     "ReliabilitySnapshot",
     "SeverityAnalysis",
     "SeverityPoint",
+    "SubgroupAnalysis",
+    "SubgroupCurve",
+    "SubgroupPoint",
+    "SubgroupSnapshot",
     "analyse_severity_curves",
     "analyse_reliability_under_shift",
+    "analyse_subgroups_under_shift",
     "apply_corruption",
     "distortion_metrics",
     "evaluate_corruptions",
@@ -40,4 +55,5 @@ __all__ = [
     "peak_signal_to_noise_ratio",
     "root_mean_square_error",
     "summarise_prediction_records",
+    "summarise_subgroups",
 ]
