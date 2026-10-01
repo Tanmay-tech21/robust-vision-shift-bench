@@ -1,6 +1,7 @@
 """Controlled image-corruption and robustness evaluation utilities."""
 
-from .adapters import LogitPredictor, NearestCentroidClassifier
+from .adapters import BlockMeanCentroidClassifier, LogitPredictor, NearestCentroidClassifier
+from .comparison import ComparisonPoint, ModelComparison, compare_models
 from .corruptions import CorruptionKind, CorruptionSpec, apply_corruption
 from .evaluation import BenchmarkResult, ConditionResult, PredictionRecord, evaluate_corruptions
 from .metrics import distortion_metrics, peak_signal_to_noise_ratio, root_mean_square_error
@@ -26,13 +27,16 @@ from .synthetic import make_pattern_dataset, make_reference_image
 
 __all__ = [
     "BenchmarkResult",
+    "BlockMeanCentroidClassifier",
+    "ComparisonPoint",
     "ConditionResult",
     "CorruptionCurve",
     "CorruptionKind",
     "CorruptionSpec",
-    "LogitPredictor",
     "GroupSnapshot",
+    "LogitPredictor",
     "NearestCentroidClassifier",
+    "ModelComparison",
     "PredictionRecord",
     "ReliabilityAnalysis",
     "ReliabilityCurve",
@@ -48,6 +52,7 @@ __all__ = [
     "analyse_reliability_under_shift",
     "analyse_subgroups_under_shift",
     "apply_corruption",
+    "compare_models",
     "distortion_metrics",
     "evaluate_corruptions",
     "make_pattern_dataset",

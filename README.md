@@ -145,6 +145,29 @@ accepted predictions. This is a controlled diagnostic fixture, not evidence
 about a trained model or a protected demographic group. It demonstrates that
 aggregate target coverage cannot substitute for subgroup-level risk reporting.
 
+## Day 6: compare models with paired evidence
+
+Cross-model reports now require identically ordered examples, corruption
+conditions, and seeds. Accuracy differences are bootstrapped from per-example
+paired outcomes, retaining the information lost by independent intervals. Each
+condition is labelled as supporting the baseline, supporting the candidate, or
+remaining inconclusive according to whether its interval excludes zero.
+
+The deterministic comparison used a pixel-level nearest-centroid reference and
+an otherwise matched classifier applying `2x2` mean pooling:
+
+| Condition | Pixel centroid | Mean-pooled centroid | Difference (95% interval) |
+|---|---:|---:|---:|
+| Clean | 0.9708 | 0.9708 | 0.0000 `[0.0000, 0.0000]` |
+| Blur, severity 3 | 0.9417 | 0.9458 | 0.0042 `[0.0000, 0.0125]` |
+| Blur, severity 4 | 0.5875 | 0.5875 | 0.0000 `[0.0000, 0.0000]` |
+| Blur, severity 5 | 0.3333 | 0.5375 | 0.2042 `[0.1542, 0.2542]` |
+
+Only severe blur at level 5 supported a difference; the other 20 clean or
+corrupted conditions were inconclusive. Pooling therefore improved this one
+controlled endpoint, not robustness in general. Both systems remain transparent
+pipeline-validation references rather than trained deep-learning models.
+
 ## Quick start
 
 ```bash
@@ -156,6 +179,7 @@ python scripts/evaluate_classifier.py
 python scripts/analyze_severity_curves.py
 python scripts/analyze_reliability_under_shift.py
 python scripts/analyze_subgroups_under_shift.py
+python scripts/compare_reference_models.py
 pytest
 ```
 
@@ -175,5 +199,6 @@ pytest
 3. Severity curves and corruption-normalised degradation metrics (complete)
 4. Calibration and selective prediction under corruption (complete)
 5. Subgroup and worst-case diagnostics (complete)
-6. Cross-model comparison report
+6. Cross-model comparison report (complete)
 7. Reproducible benchmark card and portfolio integration
+
