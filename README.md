@@ -168,6 +168,31 @@ corrupted conditions were inconclusive. Pooling therefore improved this one
 controlled endpoint, not robustness in general. Both systems remain transparent
 pipeline-validation references rather than trained deep-learning models.
 
+## Day 7: publish one reproducible benchmark card
+
+The weekly result is now generated as both a human-readable benchmark card and
+a machine-readable JSON snapshot. Both artifacts come from one deterministic
+evaluation run, preventing hand-copied headline numbers from drifting away from
+the underlying analyses. The report records:
+
+- dataset sizes, model definitions, seeds, corruptions, and thresholds;
+- paired cross-model evidence with bootstrap intervals;
+- first failures for accuracy, calibration, selective risk, and subgroups;
+- claim boundaries and limitations; and
+- concrete next-validation steps.
+
+The generated card preserves the central finding: `2x2` mean pooling was
+supported only for Gaussian blur at severity 5. The remaining 20 paired
+conditions were inconclusive. This is evidence for a local effect on a
+controlled fixture, not a general architecture ranking.
+
+Regenerate `artifacts/BENCHMARK_CARD.md` and
+`artifacts/benchmark_summary.json` with:
+
+```bash
+python scripts/build_benchmark_card.py
+```
+
 ## Quick start
 
 ```bash
@@ -180,6 +205,7 @@ python scripts/analyze_severity_curves.py
 python scripts/analyze_reliability_under_shift.py
 python scripts/analyze_subgroups_under_shift.py
 python scripts/compare_reference_models.py
+python scripts/build_benchmark_card.py
 pytest
 ```
 
@@ -200,5 +226,4 @@ pytest
 4. Calibration and selective prediction under corruption (complete)
 5. Subgroup and worst-case diagnostics (complete)
 6. Cross-model comparison report (complete)
-7. Reproducible benchmark card and portfolio integration
-
+7. Reproducible benchmark card and portfolio integration (complete)

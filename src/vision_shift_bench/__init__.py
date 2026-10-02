@@ -13,6 +13,11 @@ from .reliability import (
     analyse_reliability_under_shift,
     summarise_prediction_records,
 )
+from .reporting import (
+    build_benchmark_snapshot,
+    render_benchmark_card,
+    write_benchmark_artifacts,
+)
 from .robustness import CorruptionCurve, SeverityAnalysis, SeverityPoint, analyse_severity_curves
 from .subgroups import (
     GroupSnapshot,
@@ -52,6 +57,7 @@ __all__ = [
     "analyse_reliability_under_shift",
     "analyse_subgroups_under_shift",
     "apply_corruption",
+    "build_benchmark_snapshot",
     "compare_models",
     "distortion_metrics",
     "evaluate_corruptions",
@@ -59,6 +65,8 @@ __all__ = [
     "make_reference_image",
     "peak_signal_to_noise_ratio",
     "root_mean_square_error",
+    "render_benchmark_card",
     "summarise_prediction_records",
     "summarise_subgroups",
+    "write_benchmark_artifacts",
 ]
